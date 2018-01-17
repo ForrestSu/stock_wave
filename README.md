@@ -12,11 +12,11 @@ web-front: use ECharts draw graph.
 py_websocket: send json data to web-front
 ```json
 { 
-  'msg_type' : 99981 ,
-  'timems' : 1,
-  'code': 'ru1801',
-  'realpx' : 98, 
-  'predict' : 100 
+  "msg_type" : 99981 ,
+  "timems" : 1,
+  "code": "ru1801",
+  "realpx" : 98, 
+  "predict" : 100 
 }
 ```
 ### Improve
