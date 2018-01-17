@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <title>Stock Real Wave 1.0</title>
+    <link rel=stylesheet href='files/style.css' type='text/css'>
+    <link rel="shortcut icon" href="files/logo.ico">
+
+    <script src="js/echarts-3.8.4.min.js"></script>
+    <script src="js/message.js"></script>
+    
+</head>
+<body>
+    <div class="container"> 
+    <div id="markup">  
+        <center><font color="#0284C3" style="font-size:20px"> Price Prediction Wave </font> </center> 
+        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+        <div id="main" style="height:600px"></div>
+        <script>
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('main'));
+            //myChart.showLoading();
+            var G_data_series = [
+                {
+                    name: 'real_price',
+                    type: 'line',
+                    xAxisIndex: 0,
+                    smooth: true,
+                    data: []//[5, 20, 36, 10, 10, 20] /// 全局数据 G_real_px
+                },
+                {
+                    name: 'predict_price',
+                    type: 'line',
+                    smooth: true,
+                    data: []//[5, 20, 11, 55, 77, 88] /// 全局数据 G_predict_px
+                }
+            ];
+            var G_data_xAxis = [{
+                    type: 'category',
+                    data: []//["2016-1", "2016-2", "2016-3", "2016-4", "2016-5", "2016-6", "2016-7", "2016-8", "2016-9", "2016-10", "2016-11", "2016-12"] 
+            }];
+            // 指定图表的配置项和数据
+            var option = {
+                color: ['#5793f3', '#d14a61', '#675bba'],
+                title: {
+                    show: false,
+                    text: 'Stock Wave Prediction'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    },
+                    backgroundColor: 'rgba(50,50,50,0.2)'
+                },
+                legend: {
+                    data:['real_price', 'predict_price']
+                },
+                xAxis: G_data_xAxis,
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: G_data_series,
+                //缩放组件
+                dataZoom: [
+                    {
+                        type: 'slider',
+                        show: true,
+                        xAxisIndex: [0],
+                        start: 1,
+                        end: 100 
+                    },
+                    {
+                        type: 'inside',
+                        xAxisIndex: [0],
+                        start: 1,
+                        end: 100
+                    } 
+                ]
+            };
+            
+            // myChart.hideLoading();
+            // 使用刚指定的配置项和数据显示图表
+            myChart.setOption(option);
+            /*窗口自适应，关键代码*/
+            window.onresize = function () { 
+                 myChart.resize();
+            } 
+            var mywebsocket = new messageClient("test",function(msg){
+                //console.log(msg);
+                G_data_xAxis[0].data.push(msg.timems);
+                G_data_series[0].data.push(msg.realpx.toFixed(2));
+                G_data_series[1].data.push(msg.predict.toFixed(2));
+                myChart.setOption({
+                    xAxis: G_data_xAxis,
+                    series: G_data_series
+                });
+            })
+            mywebsocket.connect();
+
+            window.onbeforeunload = function () {
+            try {
+                mywebsocket.sendText('quit');
+                mywebsocket.close();
+                mywebsocket = null;
+            }
+            catch (ex) {
+                log(ex);
+            }
+        };
+        </script>
+    </div>
+    </div>
+</body>
+</html>
